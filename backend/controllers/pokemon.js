@@ -1,3 +1,5 @@
+const Sequelize = require("sequelize");
+const db = require("../models");
 const Pokemon = require("../models").Pokemon;
 
 module.exports = {
@@ -23,6 +25,18 @@ module.exports = {
       where: {
         name: name,
       },
+    })
+      .then((pokemon) => {
+        return res.status(200).json({ pokemon });
+      })
+      .catch((err) => {
+        return res.status(400).json({ err });
+      });
+  },
+  getRandomPokemon: (req, res) => {
+    Pokemon.findAll({
+      order: db.sequelize.random(),
+      limit: 1,
     })
       .then((pokemon) => {
         return res.status(200).json({ pokemon });
