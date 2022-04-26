@@ -11,6 +11,7 @@ const RANDOM_POKEMON = import.meta.env.VITE_API_URL_RANDOM;
 const data = ref();
 const chosenPokemon = ref();
 const show = ref(false);
+
 const sound = new Howl({
   src: [clickSound],
 });
@@ -103,7 +104,7 @@ useKeypress({
       >
         <h1
           class="font-start transition-opacity duration-100 opacity-0"
-          :class="{ show: show }"
+          :class="{ show }"
         >
           {{ chosenPokemon.name }} <span>#{{ chosenPokemon.number }}</span>
         </h1>
@@ -112,19 +113,18 @@ useKeypress({
           class="my-4 transition-opacity duration-100 opacity-0"
           :src="chosenPokemon.image"
           alt=""
-          :class="{ show: show }"
-          @click="test"
+          :class="{ show }"
         />
 
         <div
           class="w-full break-words my-4 transition-opacity duration-100 opacity-0"
           v-html="chosenPokemon.description"
-          :class="{ show: show }"
+          :class="{ show }"
         ></div>
 
         <div
           class="w-full flex flex-row mb-2 transition-opacity duration-100 opacity-0"
-          :class="{ show: show }"
+          :class="{ show }"
         >
           <div
             class="w-2/5 p-4 border-2 border-solid border-red-900 uppercase font-start bg-red-900 text-white"
@@ -139,7 +139,7 @@ useKeypress({
         </div>
         <div
           class="w-full flex flex-row transition-opacity duration-100 opacity-0"
-          :class="{ show: show }"
+          :class="{ show }"
         >
           <div
             class="w-2/5 p-4 border-2 border-solid border-red-900 uppercase font-start bg-red-900 text-white"
@@ -157,13 +157,13 @@ useKeypress({
     <div class="w-full h-14 mt-3 flex flex-row justify-between items-center">
       <div class="flex flex-row items-center ml-5">
         <div
-          class="lense relative w-12 aspect-square bg-white rounded-full"
+          class="lens relative w-12 aspect-square bg-white rounded-full"
         ></div>
         <div
-          class="lense lense-red relative w-5 aspect-square bg-white rounded-full ml-5"
+          class="lens lense-red relative w-5 aspect-square bg-white rounded-full ml-5"
         ></div>
         <div
-          class="lense lense-green relative w-5 aspect-square bg-white rounded-full ml-5"
+          class="lens lense-green relative w-5 aspect-square bg-white rounded-full ml-5"
         ></div>
       </div>
       <div class="flex ml-5">
