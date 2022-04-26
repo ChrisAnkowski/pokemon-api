@@ -5,7 +5,6 @@ const Pokemon = require("../models").Pokemon;
 module.exports = {
   getAllPokemon: (req, res) => {
     Pokemon.findAll({
-      attributes: ["id", "number", "name", "type", "category"],
       // limit: 10,
       order: [["id", "ASC"]],
     })
@@ -18,14 +17,18 @@ module.exports = {
         return res.status(400).json({ err });
       });
   },
-  getPokemonByName: (req, res) => {
-    let name = req.params.name;
-
-    Pokemon.findOne({
+  getPokemonByNameOrNumber: (req, res) => {
+    let param = req.params.nameOrNumber;
+    let options = {
       where: {
-        name: name,
+        name: param,
       },
-    })
+    };
+    if (!isNaN(param)) {
+      options = { where: { number: param } };
+    }
+
+    Pokemon.findOne(options)
       .then((pokemon) => {
         return res.status(200).json({ pokemon });
       })

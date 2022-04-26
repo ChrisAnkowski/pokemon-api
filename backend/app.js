@@ -11,15 +11,12 @@ app.use(morgan("tiny"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Routing
 app.use("/api", pokemon);
 
-// simple route
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to  application." });
 });
 
-// set port, listen for requests
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);

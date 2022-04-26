@@ -1,11 +1,11 @@
 <script setup>
-import { computed, defineProps, ref } from "vue";
+import { computed, ref } from "vue";
+const emit = defineEmits(["choosePokemon"]);
 const props = defineProps(["pokemonData"]);
 let searchTerm = ref("");
-let selectedPokemon = ref("");
 
 const selectPokemon = (pokemon) => {
-  selectedPokemon.value = pokemon;
+  emit("choosePokemon", pokemon);
   searchTerm.value = "";
 };
 
@@ -34,10 +34,10 @@ const searchPokemon = computed(() => {
 <template>
   <input
     type="text"
-    placeholder="Suche nach einem Pokemon..."
+    placeholder="Suche ein Pokemon..."
     v-model="searchTerm"
     class="font-start nice-shadow uppercase p-3 flex space-between items-center bg-white w-full h-14 mb-3 rounded-xl focus:outline-none"
-    :class="{ 'rounded-b-none': searchPokemon.length > 1 }"
+    :class="{ 'rounded-b-none': searchPokemon != '' }"
   />
   <ul
     class="w-[calc(100%+-24px)] bg-white absolute top-[68px] left-[12px] z-20 border-solid border-b-4 border-red-800 nice-shadow-outside-bottom"
@@ -46,7 +46,8 @@ const searchPokemon = computed(() => {
     <li
       v-for="pokemon in searchPokemon"
       :key="pokemon.name"
-      @click="$emit('choosePokemon', pokemon)"
+      @click="selectPokemon(pokemon)"
+      class="p-2"
     >
       {{ pokemon.name }}
     </li>

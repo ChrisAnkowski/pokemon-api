@@ -23,6 +23,9 @@ module.exports = {
       description: {
         type: Sequelize.STRING,
       },
+      image: {
+        type: Sequelize.STRING,
+      },
       createdAt: {
         allowNull: false,
         defaultValue: new Date(),

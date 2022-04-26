@@ -1,11 +1,19 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import { useKeypress } from "vue3-keypress";
+import { Howl } from "howler";
+import { computed, onMounted, ref } from "vue";
+import clickSound from "./assets/demo_src_assets_back.wav";
 import SearchField from "./components/SearchField.vue";
 
+const previousButton = ref(null);
 const ALL_POKEMON = import.meta.env.VITE_API_URL;
 const RANDOM_POKEMON = import.meta.env.VITE_API_URL_RANDOM;
 const data = ref();
-const choosenPokemon = ref();
+const chosenPokemon = ref();
+const show = ref(false);
+const sound = new Howl({
+  src: [clickSound],
+});
 
 onMounted(async () => {
   await fetch(ALL_POKEMON)
@@ -14,18 +22,66 @@ onMounted(async () => {
 
   await fetch(RANDOM_POKEMON)
     .then((res) => res.json())
-    .then((json) => (choosenPokemon.value = json.pokemon[0]));
+    .then((json) => (chosenPokemon.value = json.pokemon[0]))
+    .then(() => {
+      show.value = true;
+    });
 });
 
-function setPokemon(pokemon) {
-  choosenPokemon.value = pokemon;
-}
+const prefixNumber = (number) => {
+  return String(number).padStart(3, "0");
+};
+
+const getPreviousNumber = computed(() => {
+  return prefixNumber(parseInt(chosenPokemon.value.number) - 1);
+});
+
+const getNextNumber = computed(() => {
+  return prefixNumber(parseInt(chosenPokemon.value.number) + 1);
+});
+
+const getPokemonByNumber = async (param) => {
+  sound.play();
+  await fetch(ALL_POKEMON + "/" + param)
+    .then((res) => res.json())
+    .then((json) => setPokemon(json.pokemon));
+};
+
+const setPokemon = (pokemon) => {
+  show.value = false;
+  setTimeout(() => {
+    chosenPokemon.value = pokemon;
+    setTimeout(() => {
+      show.value = true;
+    }, 100);
+  }, 100);
+};
+
+useKeypress({
+  keyEvent: "keydown",
+  keyBinds: [
+    {
+      keyCode: "left",
+      success: () => {
+        setTimeout(() => {
+          previousButton.value.click();
+        }, 200);
+      },
+    },
+    {
+      keyCode: "right",
+      success: () => {
+        getPokemonByNumber(getNextNumber.value);
+      },
+    },
+  ],
+});
 </script>
 
 <template>
   <div
-    v-if="choosenPokemon"
-    class="container 2xl:w-4/5 mx-auto lg:rounded-xl flex flex-col lg:h-4/5 h-full bg-red-800 items-center p-3 relative border-2 border-rose-900 border-solid lg:shadow-[-10px_10px_0px_0px_rgba(0,0,0,1),-9px_9px_0px_0px_rgba(0,0,0,1),-8px_8px_0px_0px_rgba(0,0,0,1),-7px_7px_0px_0px_rgba(0,0,0,1),-6px_6px_0px_0px_rgba(0,0,0,1),-5px_5px_0px_0px_rgba(0,0,0,1),-4px_4px_0px_0px_rgba(0,0,0,1),-3px_3px_0px_0px_rgba(0,0,0,1),-2px_2px_0px_0px_rgba(0,0,0,1),-2px_2px_0px_0px_rgba(0,0,0,1),-1px_1px_0px_0px_rgba(0,0,0,1)] shadow-none"
+    v-if="chosenPokemon"
+    class="w-full mx-auto lg:rounded-xl flex flex-col lg:h-4/5 h-full bg-red-800 items-center p-3 relative border-2 border-rose-900 border-solid lg:shadow-[-10px_10px_0px_0px_rgba(0,0,0,1),-9px_9px_0px_0px_rgba(0,0,0,1),-8px_8px_0px_0px_rgba(0,0,0,1),-7px_7px_0px_0px_rgba(0,0,0,1),-6px_6px_0px_0px_rgba(0,0,0,1),-5px_5px_0px_0px_rgba(0,0,0,1),-4px_4px_0px_0px_rgba(0,0,0,1),-3px_3px_0px_0px_rgba(0,0,0,1),-2px_2px_0px_0px_rgba(0,0,0,1),-2px_2px_0px_0px_rgba(0,0,0,1),-1px_1px_0px_0px_rgba(0,0,0,1)] shadow-none"
   >
     <Suspense>
       <SearchField
@@ -45,17 +101,31 @@ function setPokemon(pokemon) {
       <div
         class="lg:rounded-xl grow w-full bg-white z-10 border-solid border-red-900 border-2 overflow-auto p-2"
       >
-        <h1 class="font-start">
-          {{ choosenPokemon.name }} <span>#{{ choosenPokemon.number }}</span>
+        <h1
+          class="font-start transition-opacity duration-100 opacity-0"
+          :class="{ show: show }"
+        >
+          {{ chosenPokemon.name }} <span>#{{ chosenPokemon.number }}</span>
         </h1>
-        <img
-          class="my-4"
-          src="https://www.pokewiki.de/images/thumb/6/63/Sugimori_902.png/250px-Sugimori_902.png"
-          alt=""
-        />
-        <div v-html="choosenPokemon.description"></div>
 
-        <div class="w-full flex flex-row mb-2">
+        <img
+          class="my-4 transition-opacity duration-100 opacity-0"
+          :src="chosenPokemon.image"
+          alt=""
+          :class="{ show: show }"
+          @click="test"
+        />
+
+        <div
+          class="w-full break-words my-4 transition-opacity duration-100 opacity-0"
+          v-html="chosenPokemon.description"
+          :class="{ show: show }"
+        ></div>
+
+        <div
+          class="w-full flex flex-row mb-2 transition-opacity duration-100 opacity-0"
+          :class="{ show: show }"
+        >
           <div
             class="w-2/5 p-4 border-2 border-solid border-red-900 uppercase font-start bg-red-900 text-white"
           >
@@ -64,10 +134,13 @@ function setPokemon(pokemon) {
           <div
             class="w-3/5 p-4 border-2 border-solid border-red-900 font-start"
           >
-            Gift
+            {{ chosenPokemon.type }}
           </div>
         </div>
-        <div class="w-full flex flex-row">
+        <div
+          class="w-full flex flex-row transition-opacity duration-100 opacity-0"
+          :class="{ show: show }"
+        >
           <div
             class="w-2/5 p-4 border-2 border-solid border-red-900 uppercase font-start bg-red-900 text-white"
           >
@@ -76,7 +149,7 @@ function setPokemon(pokemon) {
           <div
             class="w-3/5 p-4 border-2 border-solid border-red-900 font-start"
           >
-            Fisch
+            {{ chosenPokemon.category }}
           </div>
         </div>
       </div>
@@ -94,7 +167,11 @@ function setPokemon(pokemon) {
         ></div>
       </div>
       <div class="flex ml-5">
-        <div class="h-12 w-12 p-2 bg-gray-100 text-center rounded decal mr-5">
+        <div
+          ref="previousButton"
+          class="h-12 w-12 p-2 bg-gray-100 text-center rounded decal mr-5 active:bg-gray-300 hover:bg-gray-200"
+          @click="getPokemonByNumber(getPreviousNumber)"
+        >
           <svg
             fill="transparent"
             class="h-full mx-auto fill-red-900"
@@ -107,7 +184,10 @@ function setPokemon(pokemon) {
             />
           </svg>
         </div>
-        <div class="h-12 w-12 p-2 bg-gray-100 text-center rounded decal">
+        <div
+          class="h-12 w-12 p-2 bg-gray-100 text-center rounded decal active:bg-gray-300 hover:bg-gray-200"
+          @click="getPokemonByNumber(getNextNumber)"
+        >
           <svg
             fill="transparent"
             class="h-full mx-auto fill-red-900"
@@ -129,5 +209,3 @@ function setPokemon(pokemon) {
     </div>
   </div>
 </template>
-
-<style></style>

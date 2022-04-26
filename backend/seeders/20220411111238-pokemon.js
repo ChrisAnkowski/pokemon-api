@@ -23,6 +23,7 @@ module.exports = {
               type: pokemon.type,
               category: pokemon.category,
               description: pokemon.description,
+              image: pokemon.image,
             },
           ],
           {}
