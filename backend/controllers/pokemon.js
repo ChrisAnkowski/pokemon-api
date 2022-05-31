@@ -1,4 +1,3 @@
-const Sequelize = require("sequelize");
 const db = require("../models");
 const Pokemon = require("../models").Pokemon;
 
